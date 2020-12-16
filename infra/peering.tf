@@ -1,5 +1,5 @@
 resource "aws_vpc_peering_connection" "peering" {
-  peer_vpc_id = module.sidney_vpc.vpc_id
+  peer_vpc_id = module.sydney_vpc.vpc_id
   vpc_id      = module.paris_vpc.vpc_id
   auto_accept = true
 

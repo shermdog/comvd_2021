@@ -1,8 +1,8 @@
-module "sidney_vpc" {
+module "sydney_vpc" {
   source = "./modules/vpc"
-  region = "sidney"
+  region = "sydney"
   providers = {
-    aws = aws.sidney
+    aws = aws.sydney
   }
   creator_tags = var.creator_tags
 }
