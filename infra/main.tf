@@ -14,6 +14,6 @@ provider "aws" {
 }
 
 provider "aws" {
-  alias  = "sidney"
+  alias  = "sydney"
   region = "ap-southeast-2"
 }

@@ -7,7 +7,7 @@ variable "region_cidr"{
 
   default = {
     "paris" = "10.10.10.0/24"
-    "sidney" = "10.20.20.0/24"
+    "sydney" = "10.20.20.0/24"
   }
 }
 
