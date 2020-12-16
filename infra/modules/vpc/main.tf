@@ -18,6 +18,10 @@ output "vpc_id" {
   value = aws_vpc.vpc.id
 }
 
+output "vpc_cidr_block" {
+  value = aws_vpc.vpc.cidr_block
+}
+
 resource "aws_subnet" "subnet" {
   count = 2
   vpc_id     = aws_vpc.vpc.id
@@ -43,7 +47,7 @@ resource "aws_internet_gateway" "igw" {
   )
 }
 
-resource "aws_route_table" "rtb_public" {
+resource "aws_route_table" "rtb_interconnect" {
   vpc_id = aws_vpc.vpc.id
   route {
         cidr_block = "0.0.0.0/0"
@@ -52,13 +56,17 @@ resource "aws_route_table" "rtb_public" {
   tags = merge(
     var.creator_tags,
     {
-      Name = "comvd_rtb_public"
+      Name = "comvd_rtb_interconnect"
     }
   )
 }
 
-resource "aws_route_table_association" "rtb_public_association" {
+output "rtb_interconnect_id" {
+  value = aws_route_table.rtb_interconnect.id
+}
+
+resource "aws_route_table_association" "rtb_interconnect_association" {
   count          = length(aws_subnet.subnet)
   subnet_id      = aws_subnet.subnet[count.index].id
-  route_table_id = aws_route_table.rtb_public.id
+  route_table_id = aws_route_table.rtb_interconnect.id
 }
