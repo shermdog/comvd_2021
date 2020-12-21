@@ -22,6 +22,10 @@ output "vpc_cidr_block" {
   value = aws_vpc.vpc.cidr_block
 }
 
+output "vpc_subnets" {
+  value = aws_subnet.subnet.*.id
+}
+
 resource "aws_subnet" "subnet" {
   count = 2
   vpc_id     = aws_vpc.vpc.id

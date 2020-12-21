@@ -17,3 +17,10 @@ provider "aws" {
   alias  = "sydney"
   region = "ap-southeast-2"
 }
+
+locals {
+  creator_tag = {
+    Creator = var.creator,
+    "terraform.managed" = "True"
+  }
+}
