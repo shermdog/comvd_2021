@@ -23,7 +23,7 @@ variable "bastion_key" {
 }
 
 variable "mgmt_ip" {
-  type        = string
+  type        = list
   description = "Source IP for SSH Access"
 }
 

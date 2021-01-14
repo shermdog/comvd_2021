@@ -24,7 +24,7 @@ resource "aws_security_group" "bastion_ssh" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["${var.mgmt_ip}/32"]
+    cidr_blocks = var.mgmt_ip
   }
 
   egress {
@@ -57,4 +57,8 @@ resource "aws_instance" "bastion" {
       Name = "comvd_bastion_${var.region}"
     }
   )
+}
+
+output "bastion_ip" {
+  value = aws_instance.bastion.public_ip
 }

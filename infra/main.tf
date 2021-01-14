@@ -6,6 +6,13 @@ terraform {
       version = "~> 3.0"
     }
   }
+  backend "remote" {
+    organization = "dan_personal"
+
+    workspaces {
+      name = "comvd_2021"
+    }
+  }
 }
 
 provider "aws" {

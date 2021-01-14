@@ -18,7 +18,11 @@ module "paris_bastion" {
   bastion_subnet = module.paris_vpc.vpc_subnets[0]
   mgmt_ip = var.mgmt_ip
   bastion_key  = var.bastion_key
-  bastion_security_groups = [aws_security_group.paris-sydney.id]
+  bastion_security_groups = [aws_security_group.paris-private.id]
+}
+
+output "paris_bastion_ip" {
+  value = module.paris_bastion.bastion_ip
 }
 
 data "aws_region" "sydney" {
@@ -49,18 +53,18 @@ resource "aws_route" "vpc-peering-paris-sydney" {
   vpc_peering_connection_id = aws_vpc_peering_connection.paris_sydney.id
 }
 
-resource "aws_security_group" "paris-sydney" {
-  name        = "comvd_paris_sydney"
-  description = "Allow traffic from Sydney"
+resource "aws_security_group" "paris-private" {
+  name        = "comvd_private_networks"
+  description = "Allow all internal traffic"
   vpc_id      = module.paris_vpc.vpc_id
   provider    = aws.paris
 
   ingress {
-    description = "Any from Sydney"
+    description = "Any from internal networks"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = [module.sydney_vpc.vpc_cidr_block]
+    cidr_blocks = [module.paris_vpc.vpc_cidr_block, module.sydney_vpc.vpc_cidr_block]
   }
 
   egress {
@@ -73,7 +77,39 @@ resource "aws_security_group" "paris-sydney" {
   tags = merge(
     local.creator_tag,
     {
-      Name = "comvd_paris_sydney"
+      Name = "comvd_paris_private"
     }
   )
+}
+
+module "paris_database" {
+  source = "./modules/database"
+  region = "paris"
+  providers = {
+    aws = aws.paris
+  }
+  creator_tags = local.creator_tag
+  subnet = module.paris_vpc.vpc_subnets[1]
+  bastion_key  = var.bastion_key
+  security_groups = [aws_security_group.paris-private.id]
+}
+
+output "paris_database_ip" {
+  value = module.paris_database.database_ip
+}
+
+module "paris_webserver" {
+  source = "./modules/webserver"
+  region = "paris"
+  providers = {
+    aws = aws.paris
+  }
+  creator_tags = local.creator_tag
+  subnet = module.paris_vpc.vpc_subnets[1]
+  bastion_key  = var.bastion_key
+  security_groups = [aws_security_group.paris-private.id]
+}
+
+output "paris_webserver_ip" {
+  value = module.paris_webserver.webserver_ip
 }
