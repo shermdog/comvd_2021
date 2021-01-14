@@ -40,6 +40,14 @@ resource "aws_subnet" "subnet" {
   )
 }
 
+output "public_subnet" {
+  value = aws_subnet.subnet[0].id
+}
+
+output "private_subnet" {
+  value = aws_subnet.subnet[1].id
+}
+
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
@@ -51,26 +59,25 @@ resource "aws_internet_gateway" "igw" {
   )
 }
 
-resource "aws_route_table" "rtb_interconnect" {
-  vpc_id = aws_vpc.vpc.id
-  route {
-        cidr_block = "0.0.0.0/0"
-        gateway_id = aws_internet_gateway.igw.id
-    }
+output "igw" {
+  value = aws_internet_gateway.igw.id
+}
+
+resource "aws_eip" "eip_nat_gateway" {
+  vpc = true
+}
+
+resource "aws_nat_gateway" "ngw" {
+  allocation_id = aws_eip.eip_nat_gateway.id
+  subnet_id = aws_subnet.subnet[0].id
   tags = merge(
     var.creator_tags,
     {
-      Name = "comvd_rtb_interconnect"
+      Name = "comvd_ngw"
     }
   )
 }
 
-output "rtb_interconnect_id" {
-  value = aws_route_table.rtb_interconnect.id
-}
-
-resource "aws_route_table_association" "rtb_interconnect_association" {
-  count          = length(aws_subnet.subnet)
-  subnet_id      = aws_subnet.subnet[count.index].id
-  route_table_id = aws_route_table.rtb_interconnect.id
+output "ngw" {
+  value = aws_nat_gateway.ngw.id
 }

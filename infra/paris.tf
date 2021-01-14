@@ -46,12 +46,56 @@ resource "aws_vpc_peering_connection" "paris_sydney" {
   )
 }
 
-resource "aws_route" "vpc-peering-paris-sydney" {
-  provider                  = aws.paris
-  route_table_id            = module.paris_vpc.rtb_interconnect_id
-  destination_cidr_block    = module.sydney_vpc.vpc_cidr_block
-  vpc_peering_connection_id = aws_vpc_peering_connection.paris_sydney.id
+resource "aws_route_table" "paris_rtb_public" {
+  provider    = aws.paris
+  vpc_id = module.paris_vpc.vpc_id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = module.paris_vpc.igw
+  }
+  route {
+    cidr_block = module.sydney_vpc.vpc_cidr_block
+    gateway_id = aws_vpc_peering_connection.paris_sydney.id
+  }
+  tags = merge(
+    local.creator_tag,
+    {
+      Name = "comvd_rtb_public"
+    }
+  )
 }
+
+resource "aws_route_table_association" "paris_rtb_public_association" {
+  provider    = aws.paris
+  subnet_id      = module.paris_vpc.public_subnet
+  route_table_id = aws_route_table.paris_rtb_public.id
+}
+
+resource "aws_route_table" "paris_rtb_private" {
+  provider    = aws.paris
+  vpc_id = module.paris_vpc.vpc_id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = module.paris_vpc.ngw
+  }
+  route {
+    cidr_block = module.sydney_vpc.vpc_cidr_block
+    gateway_id = aws_vpc_peering_connection.paris_sydney.id
+  }
+  tags = merge(
+    local.creator_tag,
+    {
+      Name = "comvd_rtb_private"
+    }
+  )
+}
+
+resource "aws_route_table_association" "paris_rtb_private_association" {
+  provider    = aws.paris
+  subnet_id      = module.paris_vpc.private_subnet
+  route_table_id = aws_route_table.paris_rtb_private.id
+}
+
 
 resource "aws_security_group" "paris-private" {
   name        = "comvd_private_networks"
