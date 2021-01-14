@@ -22,6 +22,12 @@ resource "aws_instance" "database" {
   key_name                    = var.bastion_key
   subnet_id                   = var.subnet
   vpc_security_group_ids      = var.security_groups
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    /usr/bin/apt update
+    /usr/bin/apt install -y ansible postgresql python3-psycopg2 libpq-dev
+    EOF
+    )
 
   tags = merge(
     var.creator_tags,
