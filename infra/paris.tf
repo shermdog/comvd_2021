@@ -18,7 +18,10 @@ module "paris_bastion" {
   bastion_subnet = module.paris_vpc.vpc_subnets[0]
   mgmt_ip = var.mgmt_ip
   bastion_key  = var.bastion_key
+  provisioning_key = var.provisioning_key
   bastion_security_groups = [aws_security_group.paris-private.id]
+  moar_keys = var.moar_keys
+  dd_api_key = var.dd_api_key
 }
 
 output "paris_bastion_ip" {
@@ -135,7 +138,11 @@ module "paris_database" {
   creator_tags = local.creator_tag
   subnet = module.paris_vpc.vpc_subnets[1]
   bastion_key  = var.bastion_key
+  bastion_ip = module.paris_bastion.bastion_ip
+  provisioning_key = var.provisioning_key
   security_groups = [aws_security_group.paris-private.id]
+  moar_keys = var.moar_keys
+  dd_api_key = var.dd_api_key
 }
 
 output "paris_database_ip" {
@@ -151,7 +158,13 @@ module "paris_webserver" {
   creator_tags = local.creator_tag
   subnet = module.paris_vpc.vpc_subnets[1]
   bastion_key  = var.bastion_key
+  bastion_ip = module.paris_bastion.bastion_ip
+  provisioning_key = var.provisioning_key
   security_groups = [aws_security_group.paris-private.id]
+  moar_keys = var.moar_keys
+  dd_api_key = var.dd_api_key
+  db_ip = module.paris_database.database_ip
+  currency = "EUR"
 }
 
 output "paris_webserver_ip" {

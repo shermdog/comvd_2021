@@ -57,6 +57,26 @@ resource "aws_instance" "bastion" {
       Name = "comvd_bastion_${var.region}"
     }
   )
+
+  connection {
+    type     = "ssh"
+    user     = "ec2-user"
+    host     = self.public_ip
+    private_key = file(var.provisioning_key)
+  }
+
+  provisioner "file" {
+    content     = templatefile("${path.root}/provisioning/templates/ssh.yml.tpl", {moar_keys = var.moar_keys})
+    destination = "/home/ec2-user/ssh.yml"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo /usr/bin/amazon-linux-extras install -y ansible2",
+      "/usr/bin/ansible-playbook /home/ec2-user/ssh.yml",
+      "DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=${var.dd_api_key} DD_SITE=\"datadoghq.com\" bash -c \"$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)\"",
+    ]
+  }
 }
 
 output "bastion_ip" {

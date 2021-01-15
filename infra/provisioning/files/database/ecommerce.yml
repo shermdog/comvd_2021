@@ -1,0 +1,35 @@
+- hosts: localhost
+  become: yes
+  become_user: postgres
+  tasks:
+    - name: Drop ecommerce database
+      community.general.postgresql_db:
+        name: ecommerce
+        state: absent
+    - name: Create ecommerce database
+      community.general.postgresql_db:
+        name: ecommerce
+    - name: Create datadog user for ecommerce
+      community.general.postgresql_user:
+        name: datadog
+        password: datadog123
+        role_attr_flags: SUPERUSER
+    - name: GRANT ALL PRIVILEGES ON SCHEMA ecommerce TO datadog
+      community.general.postgresql_privs:
+        db: ecommerce
+        privs: ALL
+        objs: ALL_IN_SCHEMA
+        role: datadog
+    - name: Restore ecommerce database content
+      community.general.postgresql_db:
+        name: ecommerce
+        state: restore
+        target: /home/ubuntu/ecommerce.sql
+    - name: Grant user access from all
+      community.general.postgresql_pg_hba:
+        dest: /etc/postgresql/12/main/pg_hba.conf
+        contype: host
+        users: datadog
+        source: all
+        databases: ecommerce
+        method: md5

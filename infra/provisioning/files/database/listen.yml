@@ -1,0 +1,13 @@
+- hosts: localhost
+  become: yes
+  tasks:
+  - name: Configure PostgreSQL. Set listen_addresses.
+    lineinfile: dest=/etc/postgresql/12/main/postgresql.conf
+      regexp="listen_addresses =" line="listen_addresses = '*'" state=present
+    notify: restart postgresql
+
+  handlers:
+  - name: restart postgresql
+    ansible.builtin.service:
+      name: postgresql
+      state: restarted
