@@ -70,11 +70,17 @@ resource "aws_instance" "bastion" {
     destination = "/home/ec2-user/ssh.yml"
   }
 
+  provisioner "file" {
+    content     = templatefile("${path.root}/provisioning/templates/datadog_agent.yml.tpl", {dd_api_key = var.dd_api_key})
+    destination = "/home/ec2-user/datadog_agent.yml"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "sudo /usr/bin/amazon-linux-extras install -y ansible2",
+      "/usr/bin/ansible-galaxy install datadog.datadog",
       "/usr/bin/ansible-playbook /home/ec2-user/ssh.yml",
-      "DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=${var.dd_api_key} DD_SITE=\"datadoghq.com\" bash -c \"$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)\"",
+      "/usr/bin/ansible-playbook /home/ec2-user/datadog_agent.yml",
     ]
   }
 }

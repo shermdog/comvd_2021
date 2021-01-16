@@ -1,7 +1,3 @@
-data "aws_availability_zones" "available" {
-  state = "available"
-}
-
 resource "aws_vpc" "vpc" {
   cidr_block       = var.region_cidr[var.region]
   instance_tenancy = "default"
@@ -24,6 +20,10 @@ output "vpc_cidr_block" {
 
 output "vpc_subnets" {
   value = aws_subnet.subnet.*.id
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
 }
 
 resource "aws_subnet" "subnet" {

@@ -137,7 +137,7 @@ module "sydney_webserver" {
   moar_keys = var.moar_keys
   dd_api_key = var.dd_api_key
   db_ip = module.paris_database.database_ip
-  currency = "EUR"
+  currency = "AUD"
 }
 
 output "sydney_webserver_ip" {

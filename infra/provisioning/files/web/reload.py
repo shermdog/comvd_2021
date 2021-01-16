@@ -22,7 +22,7 @@ def stock_products():
     stock = Stock.query.all()
     for item in stock:
         if item.count_on_hand < 10:
-            item.count_on_hand += randrange(10)
+            item.count_on_hand += randrange(50)
             item.updated_at = now
     db.session.commit()
     return "Stocked"
